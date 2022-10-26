@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" href="images/favicon.ico">
+	<title>My note</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link href="css/font-awesome.css" rel="stylesheet">
+    
+    <!-- Custom styles for this template -->
+    <link href="css/style.css" rel="stylesheet">
+    
+</head>
+<body>
+	<div class="container-fluid" id="wrapper">
+		<div class="row">
+			<nav class="sidebar col-xs-12 col-sm-4 col-lg-3 col-xl-2">
+				<h1 class="site-title"><a href="index.html"><em class="fa fa-rocket"></em> Weekend</a></h1>
+				
+				<a href="#menu-toggle" class="btn btn-default" id="menu-toggle"><em class="fa fa-bars"></em></a>
+				<ul class="nav nav-pills flex-column sidebar-nav">
+					<li class="nav-item" id="first-item"><a class="nav-link" href="#"><em class="fa fa-dashboard"></em> Notes</a></li>
+					<li class="nav-item" id="new-note-btn"><a class="nav-link" href="#"><em class="fa fa-sticky-note"></em> New Note <span class="icon pull-right"><i class="fa fa-plus"></i></span></a></li>			
+
+					<li class="parent nav-item" id="last-item"><a class="nav-link" data-toggle="collapse" href="#sub-item-1">
+						<em class="fa fa-pencil-square-o">&nbsp;</em> Tags <span data-toggle="collapse" href="#sub-item-1" class="icon pull-right"><i class="fa fa-plus"></i></span>
+					</a>
+						<ul class="children collapse" id="sub-item-1">
+							<li class="nav-item"><a class="nav-link" href="#">
+								Edit
+							</a></li>
+							<li class="nav-item" id="new-tag-btn"><a class="nav-link" href="#">
+								New tag
+							</a></li>
+						</ul>
+					</li>
+				</ul>
+			</nav>
+			<main class="col-xs-12 col-sm-8 col-lg-9 col-xl-10 pt-3 pl-4 ml-auto">
+				<header class="page-header row justify-center">
+					<div class="col-md-6 col-lg-8" >
+						<h1 class="float-left text-center text-md-left">My Notes</h1>
+					</div>
+					<div class="dropdown user-dropdown col-md-6 col-lg-4 text-center text-md-right"><a class="btn btn-stripped dropdown-toggle" href="https://example.com" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<img src="images/profile-pic.jpg" alt="profile photo" class="circle float-left profile-photo" width="50" height="auto">
+						<div class="username mt-1">
+							<h4 class="mb-1" id="user-name">Username</h4>
+							<h6 class="text-muted">Super Admin</h6>
+						</div>
+						</a>
+						<div class="dropdown-menu dropdown-menu-right" style="margin-right: 1.5rem;" aria-labelledby="dropdownMenuLink"><a class="dropdown-item" href="#"><em class="fa fa-user-circle mr-1"></em> View Profile</a>
+						     <a class="dropdown-item" href="#"><em class="fa fa-sliders mr-1"></em> Preferences</a>
+						     <a class="dropdown-item" href="#"><em class="fa fa-power-off mr-1"></em> Logout</a></div>
+					</div>
+					<div class="clear"></div>
+				</header>
+				<section class="row">
+					<div class="col-sm-12">
+						<section class="row" id="note-area">
+						</section>
+					</div>
+				</section>
+			</main>
+		</div>
+	</div>
+
+	<!-- Modal customer name -->
+	<div class="modal" tabindex="-1" role="dialog" id="myModal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Enter your name</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal">
+						<fieldset>
+							<!-- Title input-->
+							<div class="form-group">
+								<label class="col-12 control-label no-padding" for="name">Name</label>
+								<div class="col-12 no-padding">
+									<input id="name" name="name" type="text" placeholder="Your name" class="form-control">
+								</div>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="save-name">Save name</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Note -->
+	<div class="modal" tabindex="-1" role="dialog" id="note-modal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Enter your name</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal">
+						<fieldset>
+							<div class="form-group">
+								<label class="col-12 control-label no-padding" for="title-input">Title</label>
+								<div class="col-12 no-padding">
+									<input id="title-input" type="text" placeholder="Title" class="form-control">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="content-input">Content</label>
+								<textarea class="form-control" id="content-input" rows="6" placeholder="Content"></textarea>
+							  </div>
+						</fieldset>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="save-note-btn">Save note</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Tag -->
+	<div class="modal" tabindex="-1" role="dialog" id="tag-modal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Enter your name</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal">
+						<fieldset>
+							<div class="form-group">
+								<label class="col-12 control-label no-padding" for="name">Tag Name</label>
+								<div class="col-12 no-padding">
+									<input id="tag-name-input" type="text" placeholder="Tag name" class="form-control">
+								</div>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="save-tag-btn">Save tag</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+	<script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <script src="dist/js/bootstrap.min.js"></script>
+    
+    <script src="js/chart.min.js"></script>
+    <script src="js/chart-data.js"></script>
+    <script src="js/easypiechart.js"></script>
+    <script src="js/easypiechart-data.js"></script>
+    <script src="js/bootstrap-datepicker.js"></script>
+    <script src="js/custom.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+
+	<script>
+		$(document).ready(function(){
+
+			// Check name
+			checkName();
+
+			getTagList();
+			getNoteList();
+
+			// button
+			$("#new-tag-btn").click(function() {
+				$('#tag-modal').modal();
+			});
+
+			$("#new-note-btn").click(function() {
+				$('#note-modal').modal();
+			});
+
+			// Save name
+			$("#save-name").click(function(e) {
+				let name = $("#name").val();
+
+				if (!name) {
+					alert("Enter the name !!!");
+					return;
+				}
+
+				$.ajax({
+					url: "/name/save?name=" + name,
+					type: "GET",
+					contentType: "application/json; charset=UTF-8"
+				})
+				.done(function(result){
+					console.log("result: ", result);
+					$('#myModal').modal('hide');
+				})
+				.fail(function(xhr, status, errorThrown){
+					alert( "Sorry, there was a problem!" );
+					console.log( "Error: ", errorThrown );
+					console.log( "Status: ", status );
+					console.dir( xhr );
+				});
+			});
+
+			// save button
+			$("#save-note-btn").click(function(e) {
+
+				let title = $("#title-input").val();
+				let content = $("#content-input").val();
+
+				if (!title || !content) {
+					alert("Fill title and content please !!!");
+					return;
+				}
+
+				let data = {
+					title: title,
+					content: content
+				};
+				console.log("data: ", data);
+
+				$.ajax({
+					url: "/note/add",
+					type: "POST",
+					contentType: "application/json; charset=UTF-8",
+					data: JSON.stringify(data)
+				})
+				.done(function(result){
+					console.log("result: ", result);
+					getNoteList();
+
+					$("#title-input").val("");
+					$("#content-input").val("");
+					$('#note-modal').modal('hide');
+				})
+				.fail(function(xhr, status, errorThrown){
+					alert( "Sorry, there was a problem!" );
+					console.log( "Error: ", errorThrown );
+					console.log( "Status: ", status );
+					console.dir( xhr );
+				});
+			});
+
+			$("#save-tag-btn").click(function(e) {
+				let tag_name = $("#tag-name-input").val();
+
+				$.ajax({
+					url: "/tag/add?tagName=" + tag_name,
+					type: "GET"
+				})
+				.done(function(result){
+					console.log("result: ", result);
+					getTagList();
+					$('#tag-modal').modal('hide');
+				})
+				.fail(function(xhr, status, errorThrown){
+					alert( "Sorry, there was a problem!" );
+					console.log( "Error: ", errorThrown );
+					console.log( "Status: ", status );
+					console.dir( xhr );
+				});
+			});
+
+		});
+
+		function getNoteList() {
+			$.ajax({
+				url: "/note/getList",
+				method: "GET"
+			})
+			.done(function(result){
+				console.log(result);
+
+				$(".note-card").remove();
+
+				if(result){
+					result.forEach(function(element) {
+						$("#note-area").append("<div class='col-lg-3 mb-3 bg-default note-card'><div class='card'>"
+							+ "<div class='card-header'>" + element.title 
+							+ "<a href='#'' class='float-right'><em class='fa fa-ellipsis-v'></em></a>"
+							+ "</div>"
+							+ "<div class='card-block'>"
+							+ "<p>" + element.content 
+							+ "</p>"
+							+ "</div></div></div>");
+					});
+				}
+			})
+			.fail(function(xhr, status, errorThrown){
+				alert( "Sorry, there was a problem!" );
+				console.log( "Error: ", errorThrown );
+				console.log( "Status: ", status );
+				console.dir( xhr );
+			});
+		}
+
+		function checkName() {
+			$.ajax({
+				url: "/name/check",
+				method: "GET"
+			})
+			.done(function(result){
+				console.log(result);
+				$("#user-name").empty();
+				$("#user-name").append(result);
+			})
+			.fail(function(xhr, status, errorThrown){
+				console.log( "Error: ", errorThrown );
+				console.log( "Status: ", status );
+				console.dir( xhr );
+
+				$("#user-name").empty();
+				$('#myModal').modal();
+			});
+		}
+
+		function getTagList() {
+			$.ajax({
+				url: "/tag/getList",
+				method: "GET"
+			})
+			.done(function(result){
+				console.log(result);
+				$(".tag-item").remove();
+
+				if(result){
+					result.forEach(function(element) {
+						$("#last-item").before("<li class='nav-item tag-item'><a class='nav-link' href='#'><em class='fa fa-tags'></em> " + element.name + " </a></li>");
+					});
+				}
+			})
+			.fail(function(xhr, status, errorThrown){
+				alert( "Sorry, there was a problem!" );
+				console.log( "Error: ", errorThrown );
+				console.log( "Status: ", status );
+				console.dir( xhr );
+			});
+		}
+
+	</script>
+
+	</body>
+</html>
