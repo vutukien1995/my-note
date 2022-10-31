@@ -78,12 +78,21 @@ public class Subscribe {
     }
 
     @RequestMapping(value = { "/tag/add" }, method = RequestMethod.GET)
-    public Object addNote(@CookieValue(value = "tags", defaultValue = "") String cookieTag,
+    public Object addTag(@CookieValue(value = "tags", defaultValue = "") String cookieTag,
                           HttpServletResponse response,
                           @RequestParam(name = "tagName") String tagName) {
         log.info("tagName: " + tagName);
 
         return tagService.add(cookieTag, tagName, response);
+    }
+
+    @RequestMapping(value = { "/tag/{id}" }, method = RequestMethod.DELETE)
+    public Object deleteTag(@CookieValue(value = "tags", defaultValue = "") String cookieTag,
+                          HttpServletResponse response,
+                          @PathVariable String id) {
+        log.info("delete tag: id " + id);
+
+        return tagService.delete(cookieTag, id, response);
     }
 
 

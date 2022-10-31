@@ -56,6 +56,36 @@ public class TagService {
         return noteList;
     }
 
+    public Object delete(String cookieTags, String id, HttpServletResponse response) {
+
+        List<Tag> tagList = new ArrayList<>();
+        if (StringUtils.hasText(cookieTags)) {
+            byte[] result = Base64.getDecoder().decode(cookieTags);
+            List<LinkedTreeMap> maps = new Gson().fromJson(new String(result), List.class);
+            for (LinkedTreeMap linkedTreeMap: maps) {
+                Tag element = new Gson().fromJson(new Gson().toJson(linkedTreeMap), Tag.class);
+                tagList.add(element);
+            }
+        }
+
+        // remove tag
+        for (int i = 0; i<tagList.size(); i++) {
+            if (id.equals(Integer.toString(tagList.get(i).getId()))) {
+                tagList.remove(i);
+                break;
+            }
+        }
+
+        // add cookie to response
+        String s = new Gson().toJson(tagList);
+        log.info("cookie: " + s);
+        String encodedString = Base64.getEncoder().encodeToString(s.getBytes());
+        Cookie cookie = new Cookie("tags", encodedString);
+        response.addCookie(cookie);
+
+        return "Deleted a note !!!";
+    }
+
 
     // ================================ PRIVATE FUNCTION ====================
     private int takeId(List<Tag> tagList) {
