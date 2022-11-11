@@ -2,6 +2,7 @@ package com.msb.mynote.service;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import com.msb.mynote.infras.constant.Constants;
 import com.msb.mynote.infras.model.Note;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -41,7 +42,7 @@ public class NoteService {
         String s = new Gson().toJson(noteList);
         log.info("cookie: " + s);
         String encodedString = Base64.getEncoder().encodeToString(s.getBytes());
-        Cookie cookie = new Cookie("notes", encodedString);
+        Cookie cookie = new Cookie(Constants.NOTES_COOKIE, encodedString);
         response.addCookie(cookie);
 
         return "Added a new note !!!";

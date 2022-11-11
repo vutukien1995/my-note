@@ -2,6 +2,7 @@ package com.msb.mynote.service;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import com.msb.mynote.infras.constant.Constants;
 import com.msb.mynote.infras.model.Note;
 import com.msb.mynote.infras.model.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class TagService {
         String s = new Gson().toJson(tagList);
         log.info("cookie: " + s);
         String encodedString = Base64.getEncoder().encodeToString(s.getBytes());
-        Cookie cookie = new Cookie("tags", encodedString);
+        Cookie cookie = new Cookie(Constants.TAGS_COOKIE, encodedString);
         response.addCookie(cookie);
 
         return "Added a new note !!!";
@@ -56,7 +57,7 @@ public class TagService {
         return noteList;
     }
 
-    public Object delete(String cookieTags, String id, HttpServletResponse response) {
+    public Object delete(String cookieTags, String cookieNotes, String id, HttpServletResponse response) {
 
         List<Tag> tagList = new ArrayList<>();
         if (StringUtils.hasText(cookieTags)) {
@@ -65,6 +66,16 @@ public class TagService {
             for (LinkedTreeMap linkedTreeMap: maps) {
                 Tag element = new Gson().fromJson(new Gson().toJson(linkedTreeMap), Tag.class);
                 tagList.add(element);
+            }
+        }
+
+        List<Note> noteList = new ArrayList<>();
+        if (StringUtils.hasText(cookieNotes)) {
+            byte[] result = Base64.getDecoder().decode(cookieNotes);
+            List<LinkedTreeMap> maps = new Gson().fromJson(new String(result), List.class);
+            for (LinkedTreeMap linkedTreeMap: maps) {
+                Note element = new Gson().fromJson(new Gson().toJson(linkedTreeMap), Note.class);
+                noteList.add(element);
             }
         }
 
@@ -78,10 +89,27 @@ public class TagService {
 
         // add cookie to response
         String s = new Gson().toJson(tagList);
-        log.info("cookie: " + s);
+        log.info("Tags: " + s);
         String encodedString = Base64.getEncoder().encodeToString(s.getBytes());
-        Cookie cookie = new Cookie("tags", encodedString);
+        Cookie cookie = new Cookie(Constants.TAGS_COOKIE, encodedString);
         response.addCookie(cookie);
+
+        // remove tag in notes
+        for (Note note: noteList) {
+            if (!CollectionUtils.isEmpty(note.getTags()))
+                for (int i = 0; i<note.getTags().size(); i++) {
+                    if (id.equals(note.getTags().get(i))) {
+                        note.getTags().remove(i);
+                    }
+                }
+        }
+
+        // add cookie to response
+        String sNote = new Gson().toJson(noteList);
+        log.info("Notes: " + sNote);
+        String encodedNotesString = Base64.getEncoder().encodeToString(sNote.getBytes());
+        Cookie cookieNote = new Cookie(Constants.NOTES_COOKIE, encodedNotesString);
+        response.addCookie(cookieNote);
 
         return "Deleted a note !!!";
     }
