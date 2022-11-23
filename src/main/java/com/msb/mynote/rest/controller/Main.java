@@ -1,4 +1,4 @@
-package com.msb.mynote.rest;
+package com.msb.mynote.rest.controller;
 
 import com.google.gson.Gson;
 import com.msb.mynote.infras.model.Note;

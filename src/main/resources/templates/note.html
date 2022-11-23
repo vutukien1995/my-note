@@ -72,6 +72,8 @@
 		</div>
 	</div>
 
+	<input type="hidden" id="owner-id">
+
 	<!-- Modal customer name -->
 	<div class="modal" tabindex="-1" role="dialog" id="myModal">
 		<div class="modal-dialog" role="document">
@@ -216,10 +218,6 @@
 			// Check name
 			checkName();
 
-			getTagList();
-			getNoteList();
-			getAllCookie();
-
 			// button
 			$("#new-tag-btn").click(function() {
 				$('#tag-modal').modal();
@@ -242,10 +240,16 @@
 					return;
 				}
 
+				let data = {
+					name: name
+				};
+				console.log("save name: ", data);
+
 				$.ajax({
-					url: "/name/save?name=" + name,
-					type: "GET",
-					contentType: "application/json; charset=UTF-8"
+					url: "/api/user/save",
+					type: "POST",
+					contentType: "application/json; charset=UTF-8",
+					data: JSON.stringify(data)
 				})
 				.done(function(result){
 					console.log("result: ", result);
@@ -266,6 +270,7 @@
 				let title = $("#title-input").val();
 				let content = $("#content-input").val();
 				let tags = $("#tag-select-input").val();
+				let owner_id = getOwnerId();
 
 				if (!title || !content) {
 					alert("Fill title and content please !!!");
@@ -276,21 +281,24 @@
 					title: title,
 					content: content,
 					tags: tags,
+					owner: owner_id,
 				};
 				console.log("data: ", data);
 
 				$.ajax({
-					url: "/note/add",
+					url: "/api/note",
 					type: "POST",
 					contentType: "application/json; charset=UTF-8",
 					data: JSON.stringify(data)
 				})
 				.done(function(result){
 					console.log("result: ", result);
-					getNoteList();
+					getNoteList(owner_id);
 
 					$("#title-input").val("");
 					$("#content-input").val("");
+					$("#tag-select-input").val("");
+					$('#tag-select-input').selectpicker('refresh');
 					$('#note-modal').modal('hide');
 				})
 				.fail(function(xhr, status, errorThrown){
@@ -304,14 +312,23 @@
 			// Save tag
 			$("#save-tag-btn").click(function(e) {
 				let tag_name = $("#tag-name-input").val();
+				let owner_id = getOwnerId();
+
+				let data = {
+					name: tag_name,
+					owner: getOwnerId(),
+				};
+				console.log("data: ", data);
 
 				$.ajax({
-					url: "/tag/add?tagName=" + tag_name,
-					type: "GET"
+					url: "/api/tag",
+					type: "POST",
+					contentType: "application/json; charset=UTF-8",
+					data: JSON.stringify(data)
 				})
 				.done(function(result){
 					console.log("result: ", result);
-					getTagList();
+					getTagList(owner_id);
 
 					$("#tag-name-input").val("");
 					$('#tag-modal').modal('hide');
@@ -327,11 +344,43 @@
 		});
 
 		// ============================== FUNCTION =============================
-		function getNoteList() {
-			let tagList = JSON.parse(getTagListOnly() );
+		function checkName() {
+			$.ajax({
+				url: "/api/user/check",
+				method: "GET"
+			})
+			.done(function(result){
+				console.log('check name: ', result);
+				$("#user-name").empty();
+				$("#user-name").append(result.name);
+				$("#owner-id").val(result._id);
+
+				// init tag + note
+				getTagList(result._id);
+				getNoteList(result._id);
+
+				return result._id;
+			})
+			.fail(function(xhr, status, errorThrown){
+				console.log( "Error: ", errorThrown );
+				console.log( "Status: ", status );
+				console.dir( xhr );
+
+				$("#user-name").empty();
+				$('#myModal').modal();
+
+				getTagList();
+				getNoteList();
+			});
+		}
+
+		function getNoteList(owner) {
+			if(!owner) return;
+
+			let tagList = JSON.parse(getTagListOnly(owner));
 
 			$.ajax({
-				url: "/note/getList",
+				url: "/api/note/getList/" + owner,
 				method: "GET"
 			})
 			.done(function(result){
@@ -344,7 +393,7 @@
 						let tagLinkList = "";
 						if(element.tags)
 							element.tags.forEach(item => {
-								tagLinkList = tagLinkList + "<a href='/" + item + "'>" + "#" + getNameTagById(tagList, item) + "</a> ";
+								tagLinkList = tagLinkList + "<a href='/note/" + item + "'>" + "#" + getNameTagById(tagList, item) + "</a> ";
 							});
 
 						$("#note-area").append("<div class='col-lg-3 mb-3 bg-default note-card'><div class='card'>"
@@ -367,29 +416,11 @@
 			});
 		}
 
-		function checkName() {
-			$.ajax({
-				url: "/name/check",
-				method: "GET"
-			})
-			.done(function(result){
-				console.log(result);
-				$("#user-name").empty();
-				$("#user-name").append(result);
-			})
-			.fail(function(xhr, status, errorThrown){
-				console.log( "Error: ", errorThrown );
-				console.log( "Status: ", status );
-				console.dir( xhr );
+		function getTagList(owner) {
+			if(!owner) return;
 
-				$("#user-name").empty();
-				$('#myModal').modal();
-			});
-		}
-
-		function getTagList() {
 			$.ajax({
-				url: "/tag/getList",
+				url: "/api/tag/getList/" + owner,
 				method: "GET"
 			})
 			.done(function(result){
@@ -404,11 +435,11 @@
 						$("#last-item").before("<li class='nav-item tag-item'><a class='nav-link' href='#'><em class='fa fa-tags'></em> " + element.name + " </a></li>");
 					
 						// note form
-						$("#tag-select-input").append("<option value=" + element.id + " > " + element.name + " </option>");
-						$('.selectpicker').selectpicker('refresh');
+						$("#tag-select-input").append("<option value=" + element._id + " > " + element.name + " </option>");
+						$("#tag-select-input").selectpicker('refresh');
 
 						// edit box
-						$("#edit-tag-box").append("<p>" + element.name + " " + "<a onclick='removeTag(" + element.id + ")' href='#'>remove</a>" + "</p>");
+						$("#edit-tag-box").append("<p>" + element.name + " " + "<a onclick='removeTag(" + element._id + ")' href='#'>remove</a>" + "</p>");
 					});
 				}
 			})
@@ -424,17 +455,19 @@
 			let name = "";
 			console.log(tagList, id);
 			tagList.forEach(item => {
-				if (item.id.toString() == id) {
-					console.log(item.id.toString(), id, item.name);
+				if (item._id.toString() == id) {
+					console.log(item._id.toString(), id, item.name);
 					name = item.name;
 				}
 			});
 			return name;
 		}
 
-		function getTagListOnly() {
+		function getTagListOnly(owner) {
+			if(!owner) return;
+
 			return $.ajax({
-				url: "/tag/getList",
+				url: "/api/tag/getList/" + owner,
 				method: "GET",
 				async: false
 			})
@@ -442,14 +475,25 @@
 		}
 
 		function removeTag(id) {
+			if(!id) return;
+
+			let owner_id = getOwnerId();
+
+			let data = {
+				id: id,
+				owner: owner_id,
+			};
+			console.log("data: ", data);
+
 			$.ajax({
-				url: "/tag/" + id,
-				// method: "DELETE"
-				method: "GET"
+				url: "/api/tag",
+				method: "DELETE",
+				contentType: "application/json; charset=UTF-8",
+				data: JSON.stringify(data)
 			})
 			.done(function(result){
 				console.log(result);
-				getTagList();
+				getTagList(owner_id);
 			})
 			.fail(function(xhr, status, errorThrown){
 				console.log( "Error: ", errorThrown );
@@ -458,20 +502,10 @@
 			});
 		}
 
-		function getAllCookie() {
-			$.ajax({
-				url: "getAllCookie",
-				method: "GET"
-			})
-			.done(function(result){
-				console.log(result);
-			})
-			.fail(function(xhr, status, errorThrown){
-				console.log( "Error: ", errorThrown );
-				console.log( "Status: ", status );
-				console.dir( xhr );
-			});
+		function getOwnerId() {
+			return $("#owner-id").val();
 		}
+
 
 
 	</script>

@@ -5,7 +5,12 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.msb.mynote.infras.constant.Constants;
 import com.msb.mynote.infras.model.Note;
 import com.msb.mynote.infras.model.Tag;
+import com.msb.mynote.infras.repository.NoteRepository;
+import com.msb.mynote.infras.repository.TagRepository;
+import com.msb.mynote.rest.model.InputCreateTag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -16,45 +21,37 @@ import java.util.Base64;
 import java.util.List;
 
 @Slf4j
+@Service
 public class TagService {
 
-    public Object add(String cookieTags, String tagName, HttpServletResponse response) {
-        if(!StringUtils.hasText(tagName))
-            return "Tag is empty !!!";
+    @Autowired
+    NoteRepository noteRepository;
 
-        List<Tag> tagList = new ArrayList<>();
-        if (StringUtils.hasText(cookieTags)) {
-            byte[] result = Base64.getDecoder().decode(cookieTags);
-            List<LinkedTreeMap> maps = new Gson().fromJson(new String(result), List.class);
-            for (LinkedTreeMap linkedTreeMap: maps) {
-                Tag element = new Gson().fromJson(new Gson().toJson(linkedTreeMap), Tag.class);
-                tagList.add(element);
-            }
-        }
+    @Autowired
+    TagRepository tagRepository;
 
-        Tag newTag = new Tag();
-        newTag.setId(takeId(tagList));
-        newTag.setName(tagName);
-        tagList.add(newTag);
+    public Object create(InputCreateTag input) {
+        if(!StringUtils.hasText(input.getName()))
+            return "Name is empty !!";
 
-        // add cookie to response
-        String s = new Gson().toJson(tagList);
-        log.info("cookie: " + s);
-        String encodedString = Base64.getEncoder().encodeToString(s.getBytes());
-        Cookie cookie = new Cookie(Constants.TAGS_COOKIE, encodedString);
-        response.addCookie(cookie);
+        if(!StringUtils.hasText(input.getOwner()))
+            return "Owner is empty !!";
 
-        return "Added a new note !!!";
+        Tag tag = new Tag();
+        tag.setName(input.getName());
+        tag.setOwner(input.getOwner());
+
+        tagRepository.save(tag);
+
+        return "Added a new tag !!!";
     }
 
-    public Object getList(String cookieTags) {
-        List<Tag> noteList = new ArrayList<>();
-        if (StringUtils.hasText(cookieTags)) {
-            byte[] result = Base64.getDecoder().decode(cookieTags);
-            noteList = new Gson().fromJson(new String(result), List.class);
-        }
+    public Object getList(String owner) {
+        return tagRepository.findByOwner(owner);
+    }
 
-        return noteList;
+    public Object getAll() {
+        return tagRepository.findAll();
     }
 
     public Object delete(String cookieTags, String cookieNotes, String id, HttpServletResponse response) {
@@ -76,14 +73,6 @@ public class TagService {
             for (LinkedTreeMap linkedTreeMap: maps) {
                 Note element = new Gson().fromJson(new Gson().toJson(linkedTreeMap), Note.class);
                 noteList.add(element);
-            }
-        }
-
-        // remove tag
-        for (int i = 0; i<tagList.size(); i++) {
-            if (id.equals(Integer.toString(tagList.get(i).getId()))) {
-                tagList.remove(i);
-                break;
             }
         }
 
@@ -116,18 +105,5 @@ public class TagService {
 
 
     // ================================ PRIVATE FUNCTION ====================
-    private int takeId(List<Tag> tagList) {
-        int id = 1;
-
-        if(CollectionUtils.isEmpty(tagList))
-            return id;
-
-        for (Tag tag : tagList) {
-            if (id < tag.getId())
-                id = tag.getId();
-        }
-
-        return id + 1;
-    }
 
 }
