@@ -34,8 +34,9 @@ public class Main {
     }
 
     @RequestMapping(value = { "/note" }, method = RequestMethod.GET)
-    public String note(Model model) {
-        model.addAttribute("message", "Hello world !!!");
+    public String note(Model model,
+                       @RequestParam(required = false, defaultValue = "") String tag) {
+        model.addAttribute("tag", tag);
         return "note";
     }
 

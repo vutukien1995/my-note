@@ -6,6 +6,7 @@ import com.msb.mynote.infras.model.Note;
 import com.msb.mynote.rest.model.InputCreateTag;
 import com.msb.mynote.rest.model.InputCreateUser;
 import com.msb.mynote.rest.model.InputDeleteTag;
+import com.msb.mynote.rest.model.InputUpdateNote;
 import com.msb.mynote.service.NoteService;
 import com.msb.mynote.service.TagService;
 import com.msb.mynote.service.UserService;
@@ -55,15 +56,27 @@ public class Subscribe {
 
     // ========================= NOTES ===========================
 
-    @GetMapping(value = "/note/getList/{name}")
-    public Object getList(@PathVariable("name") String name) {
-        return noteService.getList(name);
+    @GetMapping(value = "/note/getList")
+    public Object getList(@RequestParam String userId,
+                          @RequestParam(required = false, defaultValue = "") String tag) {
+        return noteService.getList(userId, tag);
+    }
+
+    @GetMapping(value = "/note/{id}")
+    public Object get(@PathVariable("id") String id) {
+        return noteService.get(id);
     }
 
     @RequestMapping(value = { "/note" }, method = RequestMethod.POST)
     public Object addNote(@RequestBody Note note) {
-        log.info("note: " + new Gson().toJson(note));
+        log.info("note create: " + new Gson().toJson(note));
         return noteService.add(note);
+    }
+
+    @RequestMapping(value = { "/note" }, method = RequestMethod.PUT)
+    public Object updateNote(@RequestBody InputUpdateNote input) {
+        log.info("note update: " + new Gson().toJson(input));
+        return noteService.update(input);
     }
 
 
@@ -87,14 +100,10 @@ public class Subscribe {
         return tagService.create(input);
     }
 
-    @DeleteMapping(value = { "/tag/{id}" })
+    @DeleteMapping(value = { "/tag" })
     public Object deleteTag(@RequestBody InputDeleteTag input) {
         log.info("delete tag: " + new Gson().toJson(input));
-
-        String cookieTags = "";
-        String cookieNotes = "";
-//        return tagService.delete(cookieTags, cookieNotes, id, response);
-        return "delete a tag";
+        return tagService.delete(input);
     }
 
 
