@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
@@ -48,4 +49,15 @@ public class UserService {
     }
 
 
+    public Object logOut(HttpServletRequest request,
+                         HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies.length > 0)
+            for (Cookie cookie : cookies) {
+                cookie.setMaxAge(0);
+                response.addCookie(cookie);
+            }
+
+        return "Log out !!!";
+    }
 }

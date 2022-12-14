@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
@@ -50,6 +51,13 @@ public class Subscribe {
                            HttpServletResponse response) {
         log.info("save user: " + new Gson().toJson(inputCreateUser));
         return userService.save(inputCreateUser, response);
+    }
+
+    @GetMapping(value = "/user/logout")
+    public Object logOut(HttpServletRequest request,
+                         HttpServletResponse response) {
+        log.info("log out user");
+        return userService.logOut(request, response);
     }
 
 

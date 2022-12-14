@@ -50,7 +50,7 @@
 						<h1 class="float-left text-center text-md-left">My Notes</h1>
 					</div>
 					<div class="dropdown user-dropdown col-md-6 col-lg-4 text-center text-md-right"><a class="btn btn-stripped dropdown-toggle" href="https://example.com" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<img src="images/profile-pic.jpg" alt="profile photo" class="circle float-left profile-photo" width="50" height="auto">
+						<img src="images/profile-pic-2.jpg" alt="profile photo" class="circle float-left profile-photo" width="50" height="auto">
 						<div class="username mt-1">
 							<h4 class="mb-1" id="user-name">Username</h4>
 							<h6 class="text-muted">Super Admin</h6>
@@ -58,7 +58,7 @@
 						</a>
 						<div class="dropdown-menu dropdown-menu-right" style="margin-right: 1.5rem;" aria-labelledby="dropdownMenuLink"><a class="dropdown-item" href="#"><em class="fa fa-user-circle mr-1"></em> View Profile</a>
 						     <a class="dropdown-item" href="#"><em class="fa fa-sliders mr-1"></em> Preferences</a>
-						     <a class="dropdown-item" href="#"><em class="fa fa-power-off mr-1"></em> Logout</a></div>
+						     <a class="dropdown-item" href="#" id="log-out-btn"><em class="fa fa-power-off mr-1"></em> Logout</a></div>
 					</div>
 					<div class="clear"></div>
 				</header>
@@ -75,7 +75,7 @@
 	<input type="hidden" id="owner-id">
 
 	<!-- Modal customer name -->
-	<div class="modal" tabindex="-1" role="dialog" id="myModal">
+	<div class="modal" tabindex="-1" role="dialog" id="user-name-modal">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -294,7 +294,7 @@
 				})
 				.done(function(result){
 					console.log("result: ", result);
-					$('#myModal').modal('hide');
+					$('#user-name-modal').modal('hide');
 					checkName();
 				})
 				.fail(function(xhr, status, errorThrown){
@@ -427,6 +427,23 @@
 				});
 			});
 
+			// Log out
+			$("#log-out-btn").click(function(e) {
+				$.ajax({
+					url: "/api/user/logout",
+					type: "GET"
+				})
+				.done(function(result){
+					window.location.href = "/note";
+				})
+				.fail(function(xhr, status, errorThrown){
+					alert( "Sorry, there was a problem!" );
+					console.log( "Error: ", errorThrown );
+					console.log( "Status: ", status );
+					console.dir( xhr );
+				});
+			});
+
 		});
 
 		// ============================== FUNCTION =============================
@@ -442,7 +459,7 @@
 				$("#owner-id").val(result._id);
 
 				// init tag + note
-				getTagList(result._id);
+				getTagList(result._id, selectedTag);
 				getNoteList(result._id, selectedTag);
 
 				return result._id;
@@ -453,7 +470,7 @@
 				console.dir( xhr );
 
 				$("#user-name").empty();
-				$('#myModal').modal();
+				$('#user-name-modal').modal();
 
 				getTagList();
 				getNoteList();
@@ -464,6 +481,8 @@
 			if(!owner) return;
 
 			let tagList = JSON.parse(getTagListOnly(owner));
+			if(!tag)
+				tag = '';
 
 			$.ajax({
 				url: "/api/note/getList?userId=" + owner + "&tag=" + tag,
@@ -489,7 +508,7 @@
 							+ "		    <a class='dropdown-item' onclick='updateNoteModal(&#39;" + element._id + "&#39;)' href='#'><em class='fa fa-pencil mr-1'></em> Update</a>"
 							+ "</div></div>"
 							+ "<div class='card-block'>"
-							+ "<p>"+ element.content + "</p>"
+							+ "<p style='white-space: pre-line;'>"+ element.content + "</p>"
 							// + "<textarea readonly rows='10' style='border: 0; width: inherit; display:block; margin: 1em 0; font-size: 100%; font: inherit;'>" + element.content + "</textarea>"
 							+ tagLinkList
 							+ "</div></div></div>");
@@ -505,7 +524,7 @@
 			});
 		}
 
-		function getTagList(owner) {
+		function getTagList(owner, tag) {
 			if(!owner) return;
 
 			$.ajax({
@@ -522,7 +541,9 @@
 				if(result){
 					result.forEach(function(element) {
 						// site bar
-						$("#last-item").before("<li class='nav-item tag-item'><a class='nav-link' href='/note?tag=" + element._id + "'><em class='fa fa-tags'></em> " + element.name + " </a></li>");
+						let activeTag = "";
+						if(tag == element._id) activeTag = "active";
+						$("#last-item").before("<li class='nav-item tag-item'><a class='nav-link " + activeTag + "' href='/note?tag=" + element._id + "'><em class='fa fa-tags'></em> " + element.name + " </a></li>");
 					
 						// note form
 						$("#tag-select-input").append("<option value=" + element._id + " > " + element.name + " </option>");
