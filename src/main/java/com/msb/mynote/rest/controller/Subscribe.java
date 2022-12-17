@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.websocket.server.PathParam;
 
 @RestController
 @Slf4j
@@ -71,7 +72,7 @@ public class Subscribe {
     }
 
     @GetMapping(value = "/note/{id}")
-    public Object get(@PathVariable("id") String id) {
+    public Object get(@PathVariable String id) {
         return noteService.get(id);
     }
 
@@ -85,6 +86,12 @@ public class Subscribe {
     public Object updateNote(@RequestBody InputUpdateNote input) {
         log.info("note update: " + new Gson().toJson(input));
         return noteService.update(input);
+    }
+
+    @RequestMapping(value = { "/note/{id}" }, method = RequestMethod.DELETE)
+    public Object deleteNote(@PathVariable String id) {
+        log.info("note delete: " + id);
+        return noteService.delete(id);
     }
 
 

@@ -254,9 +254,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 
 	<script th:inline="javascript">
+		var selectedTag = /*[[${tag}]]*/;
+		var ownerId = '';
+
 		$(document).ready(function(){
 			// Check name
-			var selectedTag = /*[[${tag}]]*/;
 			checkName(selectedTag);
 
 			// button
@@ -310,7 +312,6 @@
 				let title = $("#title-input").val();
 				let content = $("#content-input").val();
 				let tags = $("#tag-select-input").val();
-				let owner_id = getOwnerId();
 
 				if (!title || !content) {
 					alert("Fill title and content please !!!");
@@ -321,7 +322,7 @@
 					title: title,
 					content: content,
 					tags: tags,
-					owner: owner_id,
+					owner: ownerId,
 				};
 				console.log("data: ", data);
 
@@ -333,7 +334,7 @@
 				})
 				.done(function(result){
 					console.log("result: ", result);
-					getNoteList(owner_id, selectedTag);
+					getNoteList(ownerId, selectedTag);
 
 					$("#title-input").val("");
 					$("#content-input").val("");
@@ -355,7 +356,6 @@
 				let title = $("#title-input-update").val();
 				let content = $("#content-input-update").val();
 				let tags = $("#tag-select-input-update").val();
-				let owner_id = getOwnerId();
 
 				if (!title || !content) {
 					alert("Fill title and content please !!!");
@@ -378,7 +378,7 @@
 				})
 				.done(function(result){
 					console.log("result: ", result);
-					getNoteList(owner_id, selectedTag);
+					getNoteList(ownerId, selectedTag);
 
 					$("#id-input-update").val("");
 					$("#title-input-update").val("");
@@ -398,11 +398,10 @@
 			// Save tag
 			$("#save-tag-btn").click(function(e) {
 				let tag_name = $("#tag-name-input").val();
-				let owner_id = getOwnerId();
 
 				let data = {
 					name: tag_name,
-					owner: getOwnerId(),
+					owner: ownerId,
 				};
 				console.log("data: ", data);
 
@@ -414,7 +413,7 @@
 				})
 				.done(function(result){
 					console.log("result: ", result);
-					getTagList(owner_id);
+					getTagList(ownerId);
 
 					$("#tag-name-input").val("");
 					$('#tag-modal').modal('hide');
@@ -447,7 +446,7 @@
 		});
 
 		// ============================== FUNCTION =============================
-		function checkName(selectedTag) {
+		function checkName() {
 			$.ajax({
 				url: "/api/user/check",
 				method: "GET"
@@ -458,9 +457,10 @@
 				$("#user-name").append(result.name);
 				$("#owner-id").val(result._id);
 
-				// init tag + note
-				getTagList(result._id, selectedTag);
-				getNoteList(result._id, selectedTag);
+				ownerId = result._id;
+
+				// reload
+				load();
 
 				return result._id;
 			})
@@ -477,15 +477,18 @@
 			});
 		}
 
-		function getNoteList(owner, tag) {
-			if(!owner) return;
+		function load() {
+			getTagList();
+			getNoteList();
+		}
 
-			let tagList = JSON.parse(getTagListOnly(owner));
-			if(!tag)
-				tag = '';
+		function getNoteList() {
+			if(!ownerId) return;
+
+			let tagList = JSON.parse(getTagListOnly());
 
 			$.ajax({
-				url: "/api/note/getList?userId=" + owner + "&tag=" + tag,
+				url: "/api/note/getList?userId=" + ownerId + "&tag=" + selectedTag,
 				method: "GET"
 			})
 			.done(function(result){
@@ -506,6 +509,7 @@
 							+ "		<button class='btn btn-sm btn-subtle dropdown-toggle float-right' type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'><em class='fa fa-cog'></em></button>"
 							+ "		<div class='dropdown-menu dropdown-menu-right' aria-labelledby='dropdownMenuButton'>"
 							+ "		    <a class='dropdown-item' onclick='updateNoteModal(&#39;" + element._id + "&#39;)' href='#'><em class='fa fa-pencil mr-1'></em> Update</a>"
+							+ "		    <a class='dropdown-item' onclick='deleteNote(&#39;" + element._id + "&#39;)' href='#'><em class='fa fa-trash-o mr-1'></em> Delete</a>"
 							+ "</div></div>"
 							+ "<div class='card-block'>"
 							+ "<p style='white-space: pre-line;'>"+ element.content + "</p>"
@@ -524,11 +528,11 @@
 			});
 		}
 
-		function getTagList(owner, tag) {
-			if(!owner) return;
+		function getTagList() {
+			if(!ownerId) return;
 
 			$.ajax({
-				url: "/api/tag/getList/" + owner,
+				url: "/api/tag/getList/" + ownerId,
 				method: "GET"
 			})
 			.done(function(result){
@@ -542,7 +546,7 @@
 					result.forEach(function(element) {
 						// site bar
 						let activeTag = "";
-						if(tag == element._id) activeTag = "active";
+						if(selectedTag == element._id) activeTag = "active";
 						$("#last-item").before("<li class='nav-item tag-item'><a class='nav-link " + activeTag + "' href='/note?tag=" + element._id + "'><em class='fa fa-tags'></em> " + element.name + " </a></li>");
 					
 						// note form
@@ -576,11 +580,11 @@
 			return name;
 		}
 
-		function getTagListOnly(owner) {
-			if(!owner) return;
+		function getTagListOnly() {
+			if(!ownerId) return;
 
 			return $.ajax({
-				url: "/api/tag/getList/" + owner,
+				url: "/api/tag/getList/" + ownerId,
 				method: "GET",
 				async: false
 			})
@@ -590,13 +594,13 @@
 		function removeTag(id) {
 			if(!id) return;
 
-			let owner_id = getOwnerId();
+			if(!confirm("Delete this tag. Are u sure?"))
+				return;
 
 			let data = {
 				id: id,
-				owner: owner_id,
-			};
-			console.log("data: ", data);
+				owner: ownerId,
+			}
 
 			$.ajax({
 				url: "/api/tag",
@@ -606,18 +610,14 @@
 			})
 			.done(function(result){
 				console.log(result);
-				getTagList(owner_id);
-				getNoteList(owner_id);
+				// reload
+				load();
 			})
 			.fail(function(xhr, status, errorThrown){
 				console.log( "Error: ", errorThrown );
 				console.log( "Status: ", status );
 				console.dir( xhr );
 			});
-		}
-
-		function getOwnerId() {
-			return $("#owner-id").val();
 		}
 
 		function updateNoteModal(id) {
@@ -635,6 +635,29 @@
 				$("#tag-select-input-update").val(result.tags);
 				$('#tag-select-input-update').selectpicker('refresh');
 				$('#note-modal-update').modal();
+			})
+			.fail(function(xhr, status, errorThrown){
+				console.log( "Error: ", errorThrown );
+				console.log( "Status: ", status );
+				console.dir( xhr );
+			});
+		}
+
+		function deleteNote(id) {
+			if(!id)
+				return;
+
+			if(!confirm("Delete this note. Are u sure?"))
+				return;
+
+			$.ajax({
+				url: "/api/note/" + id,
+				method: "DELETE",
+			})
+			.done(function(result){
+				console.log(result);
+				// reload 
+				load();
 			})
 			.fail(function(xhr, status, errorThrown){
 				console.log( "Error: ", errorThrown );

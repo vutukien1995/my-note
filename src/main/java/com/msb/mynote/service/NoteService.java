@@ -76,4 +76,15 @@ public class NoteService {
         return optionalNote.get();
     }
 
+    public Object delete(String id) {
+        Optional<Note> optionalNote = noteRepository.findById(id);
+        if(optionalNote.isEmpty())
+            return "Note id is not exist !!!";
+
+        Note note = optionalNote.get();
+        noteRepository.delete(note);
+
+        return "Delete a note !";
+    }
+
 }
